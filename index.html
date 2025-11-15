@@ -350,32 +350,32 @@
       }
     }
 
-function playClickSound() {
-  if (!audioCtx) return;
-  const now = audioCtx.currentTime;
+    function playClickSound() {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
 
-  const gain = audioCtx.createGain();
-  gain.gain.setValueAtTime(3.0, now);
-  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(3.0, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
 
-  const osc1 = audioCtx.createOscillator();
-  osc1.type = 'square';
-  osc1.frequency.setValueAtTime(6000, now);
+      const osc1 = audioCtx.createOscillator();
+      osc1.type = 'square';
+      osc1.frequency.setValueAtTime(6000, now);
 
-  const osc2 = audioCtx.createOscillator();
-  osc2.type = 'square';
-  osc2.frequency.setValueAtTime(1800, now);
+      const osc2 = audioCtx.createOscillator();
+      osc2.type = 'square';
+      osc2.frequency.setValueAtTime(1800, now);
 
-  osc1.connect(gain);
-  osc2.connect(gain);
-  gain.connect(audioCtx.destination);
+      osc1.connect(gain);
+      osc2.connect(gain);
+      gain.connect(audioCtx.destination);
 
-  osc1.start(now);
-  osc2.start(now);
+      osc1.start(now);
+      osc2.start(now);
 
-  osc1.stop(now + 0.06);
-  osc2.stop(now + 0.06);
-}
+      osc1.stop(now + 0.06);
+      osc2.stop(now + 0.06);
+    }
 
     function playTargetReachedSound() {
       if (!audioCtx) return;
@@ -405,9 +405,7 @@ function playClickSound() {
           currentProfileIndex
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      } catch (e) {
-        console.warn('Gagal menyimpan ke localStorage', e);
-      }
+      } catch (e) {}
     }
 
     function loadFromStorage() {
@@ -418,7 +416,6 @@ function playClickSound() {
         if (!parsed || !Array.isArray(parsed.profiles)) return null;
         return parsed;
       } catch (e) {
-        console.warn('Gagal membaca localStorage', e);
         return null;
       }
     }
@@ -518,22 +515,21 @@ function playClickSound() {
       saveToStorage();
     }
 
-    function checkTargetReached(triggerFromPlayback = false) {
-      if (currentTarget === 0) {
-        updateTargetStatus();
-      } else {
-        if (!targetReached && count >= currentTarget) {
-          targetReached = true;
-          updateTargetStatus();
-          playTargetReachedSound();
+    function afterCountChanged(fromPlayback) {
+      if (fromPlayback === undefined) fromPlayback = false;
 
-          if (triggerFromPlayback) {
-            stopPlayback();
-          }
-        } else {
-          updateTargetStatus();
+      updateCounter();
+      updateTargetStatus();
+
+      if (currentTarget > 0 && !targetReached && count >= currentTarget) {
+        targetReached = true;
+        updateTargetStatus();
+        playTargetReachedSound();
+        if (fromPlayback) {
+          stopPlayback();
         }
       }
+
       saveCurrentProfile();
     }
 
@@ -541,10 +537,8 @@ function playClickSound() {
       initAudioContext();
 
       count += 1;
-      updateCounter();
       flashBeat();
       playClickSound();
-      checkTargetReached(false);
 
       if (isRecording) {
         const now = performance.now();
@@ -557,6 +551,8 @@ function playClickSound() {
         }
         lastTapTime = now;
       }
+
+      afterCountChanged(false);
     }
 
     function startPlayback() {
@@ -582,10 +578,9 @@ function playClickSound() {
           if (!isPlaying) return;
 
           count += 1;
-          updateCounter();
           flashBeat();
           playClickSound();
-          checkTargetReached(true);
+          afterCountChanged(true);
 
           const nextIdx = (idx + 1) % recordIntervals.length;
           playFromIndex(nextIdx);
@@ -607,7 +602,7 @@ function playClickSound() {
 
     function setTarget(value) {
       currentTarget = value;
-      targetReached = (currentTarget !== 0 && count >= currentTarget);
+      targetReached = currentTarget !== 0 && count >= currentTarget;
       updateTargetButtons();
       updateTargetStatus();
       saveCurrentProfile();
@@ -625,8 +620,8 @@ function playClickSound() {
       lastTapTime = null;
 
       currentProfileIndex = index;
-      count = p.count || 0;
-      currentTarget = p.target || 0;
+      count = Number(p.count) || 0;
+      currentTarget = Number(p.target) || 0;
       targetReached = !!p.targetReached;
       recordIntervals = Array.isArray(p.recordIntervals) ? p.recordIntervals.slice() : [];
 
@@ -673,7 +668,6 @@ function playClickSound() {
       if (!btn) return;
       const value = parseInt(btn.getAttribute('data-target'), 10);
       setTarget(value);
-      checkTargetReached(false);
     });
 
     dzikirSelect.addEventListener('change', (e) => {
