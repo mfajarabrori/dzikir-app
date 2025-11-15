@@ -239,7 +239,6 @@
     <h1>Penghitung Dzikir</h1>
     <div class="subtitle">Multi judul dzikir, tiap judul punya hitungan & pola sendiri.</div>
 
-    <!-- Pilih & tambah/hapus judul dzikir -->
     <div class="dzikir-row">
       <select id="dzikirSelect"></select>
       <input id="dzikirNameInput" type="text" placeholder="Judul baru (mis. Subhanallah)" />
@@ -252,7 +251,6 @@
       <div id="counter" class="counter-value">0</div>
     </div>
 
-    <!-- Pilihan target -->
     <div class="row" id="targetRow">
       <button data-target="0" class="primary-outline active">Tanpa Target</button>
       <button data-target="33" class="primary-outline">Target 33</button>
@@ -309,7 +307,6 @@
   </div>
 
   <script>
-    // Elemen DOM
     const dzikirSelect = document.getElementById('dzikirSelect');
     const dzikirNameInput = document.getElementById('dzikirNameInput');
     const addDzikirBtn = document.getElementById('addDzikirBtn');
@@ -329,11 +326,9 @@
     const targetStatus = document.getElementById('targetStatus');
     const targetReachedTag = document.getElementById('targetReachedTag');
 
-    // Data utama: list dzikir
     let profiles = [];
     let currentProfileIndex = 0;
 
-    // State umum (dipetakan ke profile aktif)
     let count = 0;
     let currentTarget = 0;
     let targetReached = false;
@@ -343,9 +338,8 @@
     let isPlaying = false;
     let playTimeoutId = null;
 
-    const MIN_INTERVAL = 80; // ms
+    const MIN_INTERVAL = 80;
 
-    // Audio
     let audioCtx = null;
     function initAudioContext() {
       if (!audioCtx) {
@@ -360,31 +354,25 @@ function playClickSound() {
   if (!audioCtx) return;
   const now = audioCtx.currentTime;
 
-  // Gain utama
   const gain = audioCtx.createGain();
-  gain.gain.setValueAtTime(3.0, now); // volume besar
+  gain.gain.setValueAtTime(3.0, now);
   gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
 
-  // Oscillator 1 – frekuensi tinggi (click tajam)
   const osc1 = audioCtx.createOscillator();
   osc1.type = 'square';
   osc1.frequency.setValueAtTime(6000, now);
 
-  // Oscillator 2 – frekuensi menengah (click lebih berat)
   const osc2 = audioCtx.createOscillator();
   osc2.type = 'square';
   osc2.frequency.setValueAtTime(1800, now);
 
-  // Gabungkan dua suara
   osc1.connect(gain);
   osc2.connect(gain);
   gain.connect(audioCtx.destination);
 
-  // Mainkan
   osc1.start(now);
   osc2.start(now);
 
-  // Stop cepat
   osc1.stop(now + 0.06);
   osc2.stop(now + 0.06);
 }
@@ -409,7 +397,6 @@ function playClickSound() {
       osc.stop(now + 0.25);
     }
 
-    // LocalStorage helper
     const STORAGE_KEY = 'dzikirProfiles_v1';
 
     function saveToStorage() {
@@ -437,7 +424,6 @@ function playClickSound() {
       }
     }
 
-    // Profile helper
     function createProfile(name) {
       return {
         id: Date.now() + '_' + Math.random().toString(16).slice(2),
@@ -515,7 +501,6 @@ function playClickSound() {
         lastTapTime = null;
       }
       updateRecordStatus();
-      // jangan overwrite profile waktu init, saveCurrentProfile akan dipanggil di tap/start/stop
     }
 
     function flashBeat() {
@@ -525,21 +510,31 @@ function playClickSound() {
       }, 150);
     }
 
+    function saveCurrentProfile() {
+      if (!profiles[currentProfileIndex]) return;
+      profiles[currentProfileIndex].count = count;
+      profiles[currentProfileIndex].target = currentTarget;
+      profiles[currentProfileIndex].targetReached = targetReached;
+      profiles[currentProfileIndex].recordIntervals = recordIntervals.slice();
+      saveToStorage();
+    }
+
+    // FIX: selalu save meski target = 0
     function checkTargetReached(triggerFromPlayback = false) {
       if (currentTarget === 0) {
         updateTargetStatus();
-        return;
-      }
-      if (!targetReached && count >= currentTarget) {
-        targetReached = true;
-        updateTargetStatus();
-        playTargetReachedSound();
-
-        if (triggerFromPlayback) {
-          stopPlayback();
-        }
       } else {
-        updateTargetStatus();
+        if (!targetReached && count >= currentTarget) {
+          targetReached = true;
+          updateTargetStatus();
+          playTargetReachedSound();
+
+          if (triggerFromPlayback) {
+            stopPlayback();
+          }
+        } else {
+          updateTargetStatus();
+        }
       }
       saveCurrentProfile();
     }
@@ -620,20 +615,10 @@ function playClickSound() {
       saveCurrentProfile();
     }
 
-    function saveCurrentProfile() {
-      if (!profiles[currentProfileIndex]) return;
-      profiles[currentProfileIndex].count = count;
-      profiles[currentProfileIndex].target = currentTarget;
-      profiles[currentProfileIndex].targetReached = targetReached;
-      profiles[currentProfileIndex].recordIntervals = recordIntervals.slice();
-      saveToStorage();
-    }
-
     function loadProfileToState(index) {
       const p = profiles[index];
       if (!p) return;
 
-      // stop dulu semua activity
       stopPlayback();
       isRecording = false;
       btnRecord.classList.remove('active');
@@ -641,7 +626,6 @@ function playClickSound() {
       recordingTag.style.display = 'none';
       lastTapTime = null;
 
-      // baru ganti profil aktif dan ambil datanya
       currentProfileIndex = index;
       count = p.count || 0;
       currentTarget = p.target || 0;
@@ -656,7 +640,6 @@ function playClickSound() {
       saveToStorage();
     }
 
-    // Event handlers
     btnTap.addEventListener('click', tapDzikir);
 
     btnReset.addEventListener('click', () => {
@@ -715,7 +698,6 @@ function playClickSound() {
       loadProfileToState(currentProfileIndex);
     });
 
-    // Hapus judul dzikir yang sedang dipilih
     deleteDzikirBtn.addEventListener('click', () => {
       if (profiles.length <= 1) {
         alert('Minimal harus ada satu judul dzikir.\nJudul terakhir tidak bisa dihapus.');
@@ -734,7 +716,6 @@ function playClickSound() {
       loadProfileToState(currentProfileIndex);
     });
 
-    // Keyboard shortcuts
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space') {
         e.preventDefault();
@@ -752,7 +733,6 @@ function playClickSound() {
       }
     });
 
-    // Init
     (function init() {
       const saved = loadFromStorage();
       if (saved && Array.isArray(saved.profiles) && saved.profiles.length > 0) {
@@ -773,6 +753,7 @@ function playClickSound() {
       loadProfileToState(currentProfileIndex);
     })();
   </script>
+
   <script>
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
@@ -783,6 +764,3 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
-
-
-
