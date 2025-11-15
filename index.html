@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<link rel="manifest" href="/manifest.json">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22c55e">
   <meta charset="UTF-8">
   <title>Dzikir Counter Multi Judul + Pola + Suara + Target</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -772,5 +773,14 @@ function playClickSound() {
       loadProfileToState(currentProfileIndex);
     })();
   </script>
+  <script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("service-worker.js");
+  });
+}
+</script>
+
 </body>
 </html>
+
