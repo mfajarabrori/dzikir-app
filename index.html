@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<link rel="manifest" href="/manifest.json">
+  <meta charset="UTF-8">
+  <title>Dzikir Counter Multi Judul + Pola + Suara + Target</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #f8fafc, #e2e8f0);
+    }
+    .app {
+      background: #ffffff;
+      padding: 20px 24px;
+      border-radius: 18px;
+      box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
+      max-width: 480px;
+      width: 100%;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 1.2rem;
+      text-align: center;
+      color: #0f172a;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-bottom: 10px;
+    }
+
+    .dzikir-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .dzikir-row select {
+      flex: 1.3;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid #cbd5f5;
+      font-size: 0.8rem;
+      outline: none;
+      background: #f8fafc;
+    }
+    .dzikir-row input {
+      flex: 1.2;
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid #cbd5f5;
+      font-size: 0.8rem;
+      outline: none;
+    }
+    .dzikir-row button {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #22c55e;
+      background: #f0fdf4;
+      color: #15803d;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .dzikir-row button:hover {
+      background: #dcfce7;
+    }
+    .dzikir-row button.danger {
+      border-color: #fecaca;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .dzikir-row button.danger:hover {
+      background: #fee2e2;
+    }
+
+    .counter-display {
+      text-align: center;
+      margin: 8px 0 14px;
+    }
+    .counter-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #64748b;
+    }
+    .counter-value {
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-top: 4px;
+    }
+
+    .main-button {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.1rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #f9fafb;
+      font-weight: 600;
+      margin-bottom: 10px;
+      transition: transform 0.07s ease, box-shadow 0.07s ease, opacity 0.2s;
+      box-shadow: 0 8px 20px rgba(34, 197, 94, 0.45);
+    }
+    .main-button:active {
+      transform: scale(0.97) translateY(1px);
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.35);
+    }
+    .main-button.beat {
+      transform: scale(1.03);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.35);
+    }
+
+    .row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .row button {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #cbd5f5;
+      background: #f8fafc;
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .row button:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+    .row button.danger {
+      color: #b91c1c;
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+    .row button.danger:hover {
+      background: #fee2e2;
+    }
+    .row button.primary-outline {
+      border-color: #22c55e;
+      color: #15803d;
+      background: #f0fdf4;
+    }
+    .row button.primary-outline:hover {
+      background: #dcfce7;
+    }
+    .row button.active {
+      background: #0f172a;
+      color: #e5e7eb;
+      border-color: #020617;
+    }
+
+    .info {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .info strong {
+      color: #0f172a;
+    }
+    .status {
+      margin-top: 6px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: #f8fafc;
+      border: 1px dashed #cbd5f5;
+      font-size: 0.75rem;
+      color: #0f172a;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .status-top,
+    .status-bottom {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .status span.tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .status span.tag.red {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+    .status span.tag.green {
+      background: #dcfce7;
+      color: #166534;
+    }
+    .status span.tag.gold {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    @media (max-width: 480px) {
+      .app {
+        margin: 12px;
+        padding: 16px 14px 18px;
+      }
+      .counter-value {
+        font-size: 2.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Penghitung Dzikir</h1>
+    <div class="subtitle">Multi judul dzikir, tiap judul punya hitungan & pola sendiri.</div>
+
+    <!-- Pilih & tambah/hapus judul dzikir -->
+    <div class="dzikir-row">
+      <select id="dzikirSelect"></select>
+      <input id="dzikirNameInput" type="text" placeholder="Judul baru (mis. Subhanallah)" />
+      <button id="addDzikirBtn">Tambah</button>
+      <button id="deleteDzikirBtn" class="danger">Hapus</button>
+    </div>
+
+    <div class="counter-display">
+      <div class="counter-label">Jumlah Dzikir</div>
+      <div id="counter" class="counter-value">0</div>
+    </div>
+
+    <!-- Pilihan target -->
+    <div class="row" id="targetRow">
+      <button data-target="0" class="primary-outline active">Tanpa Target</button>
+      <button data-target="33" class="primary-outline">Target 33</button>
+      <button data-target="100" class="primary-outline">Target 100</button>
+      <button data-target="1000" class="primary-outline">Target 1000</button>
+    </div>
+
+    <button id="btnTap" class="main-button">
+      Tambah Dzikir (Space)
+    </button>
+
+    <div class="row">
+      <button id="btnReset">
+        Reset Hitungan
+      </button>
+      <button id="btnRecord" class="primary-outline">
+        Mode Rekam: OFF (R)
+      </button>
+    </div>
+
+    <div class="row">
+      <button id="btnClearRecord" class="danger">
+        Hapus Rekaman (Dzikir ini)
+      </button>
+      <button id="btnPlay" class="primary-outline">
+        Play Pola (P)
+      </button>
+      <button id="btnStop">
+        Stop (S)
+      </button>
+    </div>
+
+    <div class="status">
+      <div class="status-top">
+        <span id="recordStatus">Pola: 0 ketukan • 0.0 detik/siklus</span>
+        <span id="playingTag" class="tag red" style="display:none;">Sedang PLAY</span>
+        <span id="recordingTag" class="tag green" style="display:none;">Sedang REKAM</span>
+      </div>
+      <div class="status-bottom">
+        <span id="targetStatus">Target: tidak ditetapkan</span>
+        <span id="targetReachedTag" class="tag gold" style="display:none;">Target tercapai</span>
+      </div>
+    </div>
+
+    <div class="info">
+      <strong>Cara pakai:</strong><br>
+      • Pilih judul dzikir dari daftar, atau tulis judul baru lalu klik <strong>Tambah</strong>.<br>
+      • Tombol <strong>Hapus</strong> menghapus judul dzikir yang sedang dipilih (beserta datanya).<br>
+      • Setiap judul punya hitungan, target, dan pola rekaman sendiri (tersimpan otomatis di browser).<br>
+      • Pilih target: 33 / 100 / 1000 atau Tanpa Target, lalu rekam pola & Play.<br>
+      • Saat target tercapai, autoplay berhenti & muncul tanda <em>Target tercapai</em>.<br>
+      • Keyboard: Space = Tap, R = Rekam, P = Play, S = Stop.
+    </div>
+  </div>
+
+  <script>
+    // Elemen DOM
+    const dzikirSelect = document.getElementById('dzikirSelect');
+    const dzikirNameInput = document.getElementById('dzikirNameInput');
+    const addDzikirBtn = document.getElementById('addDzikirBtn');
+    const deleteDzikirBtn = document.getElementById('deleteDzikirBtn');
+
+    const counterEl = document.getElementById('counter');
+    const btnTap = document.getElementById('btnTap');
+    const btnReset = document.getElementById('btnReset');
+    const btnRecord = document.getElementById('btnRecord');
+    const btnClearRecord = document.getElementById('btnClearRecord');
+    const btnPlay = document.getElementById('btnPlay');
+    const btnStop = document.getElementById('btnStop');
+    const recordStatus = document.getElementById('recordStatus');
+    const playingTag = document.getElementById('playingTag');
+    const recordingTag = document.getElementById('recordingTag');
+    const targetRow = document.getElementById('targetRow');
+    const targetStatus = document.getElementById('targetStatus');
+    const targetReachedTag = document.getElementById('targetReachedTag');
+
+    // Data utama: list dzikir
+    let profiles = [];
+    let currentProfileIndex = 0;
+
+    // State umum (dipetakan ke profile aktif)
+    let count = 0;
+    let currentTarget = 0;
+    let targetReached = false;
+    let recordIntervals = [];
+    let isRecording = false;
+    let lastTapTime = null;
+    let isPlaying = false;
+    let playTimeoutId = null;
+
+    const MIN_INTERVAL = 80; // ms
+
+    // Audio
+    let audioCtx = null;
+    function initAudioContext() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) {
+          audioCtx = new AudioContext();
+        }
+      }
+    }
+
+function playClickSound() {
+  if (!audioCtx) return;
+  const now = audioCtx.currentTime;
+
+  // Gain utama
+  const gain = audioCtx.createGain();
+  gain.gain.setValueAtTime(3.0, now); // volume besar
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+
+  // Oscillator 1 – frekuensi tinggi (click tajam)
+  const osc1 = audioCtx.createOscillator();
+  osc1.type = 'square';
+  osc1.frequency.setValueAtTime(6000, now);
+
+  // Oscillator 2 – frekuensi menengah (click lebih berat)
+  const osc2 = audioCtx.createOscillator();
+  osc2.type = 'square';
+  osc2.frequency.setValueAtTime(1800, now);
+
+  // Gabungkan dua suara
+  osc1.connect(gain);
+  osc2.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  // Mainkan
+  osc1.start(now);
+  osc2.start(now);
+
+  // Stop cepat
+  osc1.stop(now + 0.06);
+  osc2.stop(now + 0.06);
+}
+
+
+    function playTargetReachedSound() {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(900, now);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 0.25);
+    }
+
+    // LocalStorage helper
+    const STORAGE_KEY = 'dzikirProfiles_v1';
+
+    function saveToStorage() {
+      try {
+        const payload = {
+          profiles,
+          currentProfileIndex
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (e) {
+        console.warn('Gagal menyimpan ke localStorage', e);
+      }
+    }
+
+    function loadFromStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        if (!parsed || !Array.isArray(parsed.profiles)) return null;
+        return parsed;
+      } catch (e) {
+        console.warn('Gagal membaca localStorage', e);
+        return null;
+      }
+    }
+
+    // Profile helper
+    function createProfile(name) {
+      return {
+        id: Date.now() + '_' + Math.random().toString(16).slice(2),
+        name: name || 'Dzikir',
+        count: 0,
+        target: 0,
+        targetReached: false,
+        recordIntervals: []
+      };
+    }
+
+    function refreshDzikirSelect() {
+      dzikirSelect.innerHTML = '';
+      profiles.forEach((p, index) => {
+        const opt = document.createElement('option');
+        opt.value = index;
+        opt.textContent = p.name;
+        dzikirSelect.appendChild(opt);
+      });
+      dzikirSelect.value = String(currentProfileIndex);
+    }
+
+    function updateCounter() {
+      counterEl.textContent = count;
+    }
+
+    function updateRecordStatus() {
+      const n = recordIntervals.length;
+      const totalMs = recordIntervals.reduce((a, b) => a + b, 0);
+      const totalSec = (totalMs / 1000).toFixed(1);
+      recordStatus.textContent = `Pola: ${n} ketukan • ${totalSec} detik/siklus`;
+    }
+
+    function updateTargetButtons() {
+      const buttons = targetRow.querySelectorAll('button[data-target]');
+      buttons.forEach(btn => {
+        const t = parseInt(btn.getAttribute('data-target'), 10);
+        if (t === currentTarget) {
+          btn.classList.add('active');
+        } else if (currentTarget === 0 && t === 0) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    function updateTargetStatus() {
+      if (currentTarget === 0) {
+        targetStatus.textContent = 'Target: tidak ditetapkan';
+        targetReachedTag.style.display = 'none';
+        return;
+      }
+      const remaining = Math.max(currentTarget - count, 0);
+      targetStatus.textContent = `Target: ${currentTarget} • Sisa: ${remaining}`;
+      if (targetReached) {
+        targetReachedTag.style.display = 'inline-flex';
+      } else {
+        targetReachedTag.style.display = 'none';
+      }
+    }
+
+    function setRecording(state) {
+      isRecording = state;
+      if (isRecording) {
+        recordIntervals = [];
+        lastTapTime = null;
+        btnRecord.classList.add('active');
+        btnRecord.textContent = 'Mode Rekam: ON (R)';
+        recordingTag.style.display = 'inline-flex';
+      } else {
+        btnRecord.classList.remove('active');
+        btnRecord.textContent = 'Mode Rekam: OFF (R)';
+        recordingTag.style.display = 'none';
+        lastTapTime = null;
+      }
+      updateRecordStatus();
+      // jangan overwrite profile waktu init, saveCurrentProfile akan dipanggil di tap/start/stop
+    }
+
+    function flashBeat() {
+      btnTap.classList.add('beat');
+      setTimeout(() => {
+        btnTap.classList.remove('beat');
+      }, 150);
+    }
+
+    function checkTargetReached(triggerFromPlayback = false) {
+      if (currentTarget === 0) {
+        updateTargetStatus();
+        return;
+      }
+      if (!targetReached && count >= currentTarget) {
+        targetReached = true;
+        updateTargetStatus();
+        playTargetReachedSound();
+
+        if (triggerFromPlayback) {
+          stopPlayback();
+        }
+      } else {
+        updateTargetStatus();
+      }
+      saveCurrentProfile();
+    }
+
+    function tapDzikir() {
+      initAudioContext();
+
+      count += 1;
+      updateCounter();
+      flashBeat();
+      playClickSound();
+      checkTargetReached(false);
+
+      if (isRecording) {
+        const now = performance.now();
+        if (lastTapTime !== null) {
+          const delta = now - lastTapTime;
+          if (delta >= MIN_INTERVAL) {
+            recordIntervals.push(delta);
+            updateRecordStatus();
+          }
+        }
+        lastTapTime = now;
+      }
+      saveCurrentProfile();
+    }
+
+    function startPlayback() {
+      if (recordIntervals.length === 0) {
+        alert('Belum ada pola yang direkam untuk dzikir ini.\nAktifkan Mode Rekam lalu tap beberapa kali dulu.');
+        return;
+      }
+      if (isPlaying) return;
+
+      initAudioContext();
+      setRecording(false);
+
+      isPlaying = true;
+      playingTag.style.display = 'inline-flex';
+
+      const playFromIndex = (idx) => {
+        if (!isPlaying || recordIntervals.length === 0) return;
+
+        const interval = recordIntervals[idx];
+        const safeInterval = Math.max(interval, MIN_INTERVAL);
+
+        playTimeoutId = setTimeout(() => {
+          if (!isPlaying) return;
+
+          count += 1;
+          updateCounter();
+          flashBeat();
+          playClickSound();
+          checkTargetReached(true);
+
+          const nextIdx = (idx + 1) % recordIntervals.length;
+          playFromIndex(nextIdx);
+        }, safeInterval);
+      };
+
+      playFromIndex(0);
+    }
+
+    function stopPlayback() {
+      isPlaying = false;
+      playingTag.style.display = 'none';
+      if (playTimeoutId !== null) {
+        clearTimeout(playTimeoutId);
+        playTimeoutId = null;
+      }
+    }
+
+    function setTarget(value) {
+      currentTarget = value;
+      targetReached = (currentTarget !== 0 && count >= currentTarget);
+      updateTargetButtons();
+      updateTargetStatus();
+      saveCurrentProfile();
+    }
+
+    function saveCurrentProfile() {
+      if (!profiles[currentProfileIndex]) return;
+      profiles[currentProfileIndex].count = count;
+      profiles[currentProfileIndex].target = currentTarget;
+      profiles[currentProfileIndex].targetReached = targetReached;
+      profiles[currentProfileIndex].recordIntervals = recordIntervals.slice();
+      saveToStorage();
+    }
+
+    function loadProfileToState(index) {
+      const p = profiles[index];
+      if (!p) return;
+
+      // stop dulu semua activity
+      stopPlayback();
+      isRecording = false;
+      btnRecord.classList.remove('active');
+      btnRecord.textContent = 'Mode Rekam: OFF (R)';
+      recordingTag.style.display = 'none';
+      lastTapTime = null;
+
+      // baru ganti profil aktif dan ambil datanya
+      currentProfileIndex = index;
+      count = p.count || 0;
+      currentTarget = p.target || 0;
+      targetReached = !!p.targetReached;
+      recordIntervals = Array.isArray(p.recordIntervals) ? p.recordIntervals.slice() : [];
+
+      updateCounter();
+      updateRecordStatus();
+      updateTargetButtons();
+      updateTargetStatus();
+      refreshDzikirSelect();
+      saveToStorage();
+    }
+
+    // Event handlers
+    btnTap.addEventListener('click', tapDzikir);
+
+    btnReset.addEventListener('click', () => {
+      count = 0;
+      targetReached = false;
+      updateCounter();
+      updateTargetStatus();
+      saveCurrentProfile();
+    });
+
+    btnRecord.addEventListener('click', () => {
+      if (isPlaying) {
+        alert('Stop dulu sebelum merekam pola baru.');
+        return;
+      }
+      setRecording(!isRecording);
+    });
+
+    btnClearRecord.addEventListener('click', () => {
+      stopPlayback();
+      setRecording(false);
+      recordIntervals = [];
+      lastTapTime = null;
+      updateRecordStatus();
+      saveCurrentProfile();
+    });
+
+    btnPlay.addEventListener('click', startPlayback);
+    btnStop.addEventListener('click', stopPlayback);
+
+    targetRow.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-target]');
+      if (!btn) return;
+      const value = parseInt(btn.getAttribute('data-target'), 10);
+      setTarget(value);
+      checkTargetReached(false);
+    });
+
+    dzikirSelect.addEventListener('change', (e) => {
+      const index = parseInt(e.target.value, 10);
+      if (!isNaN(index)) {
+        loadProfileToState(index);
+      }
+    });
+
+    addDzikirBtn.addEventListener('click', () => {
+      let name = dzikirNameInput.value.trim();
+      if (!name) {
+        name = 'Dzikir ' + (profiles.length + 1);
+      }
+      const newProfile = createProfile(name);
+      profiles.push(newProfile);
+      currentProfileIndex = profiles.length - 1;
+      dzikirNameInput.value = '';
+      refreshDzikirSelect();
+      loadProfileToState(currentProfileIndex);
+    });
+
+    // Hapus judul dzikir yang sedang dipilih
+    deleteDzikirBtn.addEventListener('click', () => {
+      if (profiles.length <= 1) {
+        alert('Minimal harus ada satu judul dzikir.\nJudul terakhir tidak bisa dihapus.');
+        return;
+      }
+      const currentProfile = profiles[currentProfileIndex];
+      const name = currentProfile ? currentProfile.name : 'Dzikir';
+      const ok = confirm(`Yakin ingin menghapus dzikir:\n"${name}"?\nSemua hitungan & pola untuk dzikir ini akan hilang.`);
+      if (!ok) return;
+
+      profiles.splice(currentProfileIndex, 1);
+      if (currentProfileIndex >= profiles.length) {
+        currentProfileIndex = profiles.length - 1;
+      }
+      refreshDzikirSelect();
+      loadProfileToState(currentProfileIndex);
+    });
+
+    // Keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        tapDzikir();
+      } else if (e.key === 'r' || e.key === 'R') {
+        if (isPlaying) {
+          alert('Stop dulu sebelum merekam pola baru.');
+          return;
+        }
+        setRecording(!isRecording);
+      } else if (e.key === 'p' || e.key === 'P') {
+        startPlayback();
+      } else if (e.key === 's' || e.key === 'S') {
+        stopPlayback();
+      }
+    });
+
+    // Init
+    (function init() {
+      const saved = loadFromStorage();
+      if (saved && Array.isArray(saved.profiles) && saved.profiles.length > 0) {
+        profiles = saved.profiles;
+        currentProfileIndex = Math.min(
+          saved.currentProfileIndex || 0,
+          profiles.length - 1
+        );
+      } else {
+        profiles = [
+          createProfile('Subhanallah'),
+          createProfile('Alhamdulillah'),
+          createProfile('Allahu Akbar')
+        ];
+        currentProfileIndex = 0;
+      }
+      refreshDzikirSelect();
+      loadProfileToState(currentProfileIndex);
+    })();
+  </script>
+</body>
+</html>
