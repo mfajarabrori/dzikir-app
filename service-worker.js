@@ -13,6 +13,7 @@ self.addEventListener("install", function (event) {
       return cache.addAll(URLS_TO_CACHE);
     })
   );
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", function (event) {
@@ -27,6 +28,7 @@ self.addEventListener("activate", function (event) {
       );
     })
   );
+  self.clients.claim();
 });
 
 self.addEventListener("fetch", function (event) {
